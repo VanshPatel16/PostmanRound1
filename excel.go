@@ -15,23 +15,46 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	inputScanner := bufio.NewScanner(os.Stdin)
-	fmt.Printf("Enter a day of the week :   ")
-	inputScanner.Scan() //took input for the day of the week and made it capitalized as our menu is in capital
-	dayOfWeek := strings.ToUpper(inputScanner.Text())
-
-	fmt.Printf("Enter the meal : Breakfast,Lunch or Dinner :  ")
-	inputScanner.Scan()
-	mealOfTheDay := strings.ToUpper(inputScanner.Text()) //took meal of that day as input and made it capitalized as out menu is in capital
-
 	// obtained the rows from the excel sheet
 	allCols, err := messMenuFile.GetCols("Sheet1")
-
+	
 	if err != nil {
 		fmt.Println("Error in fetching rows!")
 		log.Fatal(err)
 	} //checked for any errors
+
+	inputScanner := bufio.NewScanner(os.Stdin)
+
+	var dayOfWeek string //initialized a variable that stores the capitalized input of day
+
+	for true {
+
+		fmt.Printf("\nEnter a day of the week :   ")
+		inputScanner.Scan() //took input for the day of the week and made it capitalized as our menu is in capital
+		dayOfWeek = strings.ToUpper(inputScanner.Text())
+		// checking for valid inputs
+		if getDayIndex(allCols, dayOfWeek) < 0 {
+			fmt.Printf("\nInvalid Input!!!\n")
+		} else {
+			break
+		}
+	}
+
+	var mealOfTheDay string//initialized a variable that stores the capitalized input of the meal
+	for true {
+
+		fmt.Printf("\nEnter the meal : Breakfast,Lunch or Dinner :  ")
+		inputScanner.Scan()
+		mealOfTheDay = strings.ToUpper(inputScanner.Text()) //took meal of that day as input and made it capitalized as out menu is in capital
+		//checking for valid inputs
+		if mealOfTheDay != "LUNCH" && mealOfTheDay != "DINNER" && mealOfTheDay != "BREAKFAST" {
+			fmt.Printf("\nInvalid Input!!!\n")
+
+		} else {
+			break
+		}
+	}
+	
 
 	mealNow(allCols, dayOfWeek, mealOfTheDay) //this function call prints the list of items for the mealOfTheDay ... FUNCTION 1
 
@@ -53,7 +76,7 @@ func main() {
 
 	fmt.Printf("\nDo you want to convert mess menu to json file ??Enter Y/N\n")
 	inputScanner.Scan()
-	res := inputScanner.Text()
+	res := strings.ToUpper(inputScanner.Text())//added ToUpper so that the function is called even when entering 'y'(lowercase)
 
 	if res == "Y" {
 		menuToJson(allCols) //calls the function to convert data to a json file
@@ -64,11 +87,13 @@ func main() {
 
 	fmt.Printf("\nDo you want to print each instance of the meals??Enter Y/N\n")
 	inputScanner.Scan()
-	res = inputScanner.Text()
+	res = strings.ToUpper(inputScanner.Text())//added ToUpper so that the function is called even when entering 'y'(lowercase)
 
 	if res == "Y" {
 		fmt.Printf("\nEnter the file name (eg. 'mess.json' in this case)\n")
-		allMeals := jsonToStruct("mess.json")
+		inputScanner.Scan()
+		input := inputScanner.Text()
+		allMeals := jsonToStruct(input)
 		for i := 0; i < len(allMeals); i++ {
 			allMeals[i].printMeal()
 		}
@@ -78,3 +103,4 @@ func main() {
 	}
 
 }
+
